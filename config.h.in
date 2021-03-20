@@ -1,0 +1,4 @@
+#pragma once
+
+${SAMPLE_COMPILER_DEFINES}
+
