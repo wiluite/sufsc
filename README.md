@@ -43,7 +43,7 @@ dangling references to them.
 
     // New Use-Case 
     concat_arena<string_class> stack_arena;
-    auto tmp_fsc = fsc_safe_seed<string_class>(stack_arena) + s1 + ' ' + s2 + ' ' + s3 + ",ha-ha!";
+    auto tmp_fsc = fsc_safe_seed(stack_arena) + s1 + ' ' + s2 + ' ' + s3 + ",ha-ha!";
     // do something special
     // ...
     // ....

@@ -105,18 +105,17 @@ namespace stlsoft
         typedef S   string_type;
     };
 
-    template <class S>
+    template <class A>
     class fsc_safe_seed
             : public fsc_seed
     {
-        concat_arena<S> & arena_;
+        A & arena_;
     public:
-        explicit fsc_safe_seed(concat_arena<S> & arena) : arena_(arena) {}
+        explicit fsc_safe_seed(A & arena) : arena_(arena) {}
         auto& get_arena() const
         {
             return arena_;
         }
-        typedef S   string_type;
     };
 
 
