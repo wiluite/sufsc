@@ -53,5 +53,3 @@ dangling references to them.
     std::cout << result_string << '\n';
 
 ```
-
-
