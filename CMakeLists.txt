@@ -4,7 +4,7 @@ project(sufsc)
 # no memory allocations info if ON
 option (SAMPLE_WITH_SANITY_CHECK "[FASTSTRINGCONCATENATOR] Build with sanitizers" ON)
 
-if ((SAMPLE_WITH_SANITY_CHECK) AND (UNIX))
+if ((SAMPLE_WITH_SANITY_CHECK) AND (UNIX) AND (NOT (CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")))
     set (SAMPLE_COMPILER_DEFINES "#define SANITY_CHECK")
     set (SAMPLE_ADDITIONAL_COMPILE_FLAGS "-fsanitize=address,leak")
     set (SAMPLE_ADDITIONAL_LINK_FLAGS "-fsanitize=address,leak")

@@ -4,7 +4,7 @@
  * Purpose:     Fast string concatenator.
  *
  * Created:     4th November 2003 (the time added to STLSoft libraries)
- * Updated:     2nd January 2021
+ * Updated:     17th December 2022
  *
  * Thanks to:   Sean Kelly for picking up on my gratuitous use of pointers
  *              in the first implementation.
@@ -13,7 +13,7 @@
  *
  * Copyright (c) 2019-2021, Matthew Wilson and Synesis Information Systems
  * Copyright (c) 2003-2019, Matthew Wilson and Synesis Software
- * Copyright (c) 2021, wiluite
+ * Copyright (c) 2022, wiluite
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,28 +56,24 @@ namespace stlsoft
 {
     template<   class S
             ,   class C
-            ,   class T
     >
     class fast_string_concatenator;
 
     template<   class S
             ,   class C = typename S::value_type
-            ,   class T = void
     >
-    using fast_string_concatenator_sptr = std::shared_ptr<fast_string_concatenator<S,C,T>>;
+    using fast_string_concatenator_sptr = std::shared_ptr<fast_string_concatenator<S,C>>;
 
-    template <class S, class C = typename S::value_type, class T = void, std::size_t N = 50>
-    constexpr const std::size_t concat_alloc_size = sizeof(fast_string_concatenator<S,C,T>) * N;
+    template <class S, std::size_t N = 50>
+    constexpr const std::size_t concat_alloc_size = sizeof(fast_string_concatenator<S,typename S::value_type>) * N;
 
-    template<class S, class C = typename S::value_type, class T = void>
-    using concat_allocator = short_alloc<fast_string_concatenator<S, C, T>, concat_alloc_size<S,C,T>>;
+    template<class S>
+    using concat_allocator = short_alloc<fast_string_concatenator<S, typename S::value_type>, concat_alloc_size<S>>;
 
     template<typename S>
     using concat_arena = typename concat_allocator<S>::arena_type;
 
     template<   class S
-            ,   class C = typename S::value_type
-            ,   class T = void
     >
     struct concat_ptr_and_alloc
     {
@@ -93,7 +89,6 @@ namespace stlsoft
 
 namespace stlsoft
 {
-
     class fsc_seed
     {};
 
@@ -125,7 +120,6 @@ namespace stlsoft
  */
     template<   class S
             ,   class C = typename S::value_type
-            ,   class T = void //char_traits<C>
     >
     class fast_string_concatenator
     {
@@ -134,9 +128,8 @@ namespace stlsoft
     public:
         typedef S                                   string_type;
         typedef C                                   char_type;
-        typedef T                                   traits_type;
-        typedef fast_string_concatenator<S, C, T>   class_type;
-        using sptr_class_type = fast_string_concatenator_sptr<S,C,T>;
+        typedef fast_string_concatenator<S, C>      class_type;
+        using sptr_class_type = fast_string_concatenator_sptr<S,C>;
         typedef std::size_t                         size_type;
     private:
         typedef typename S::iterator      string_iterator_type;
@@ -155,7 +148,7 @@ namespace stlsoft
         fast_string_concatenator(class_type const& lhs, char_type const* rhs);
         fast_string_concatenator(sptr_class_type const& lhs, char_type const* rhs);
         fast_string_concatenator(class_type const& lhs, char_type rhs);
-        fast_string_concatenator(sptr_class_type const& lhs, char_type const rhs);
+        fast_string_concatenator(sptr_class_type const& lhs, char_type /*const*/ rhs);
         fast_string_concatenator(fsc_seed const& lhs, string_type const& rhs);
         fast_string_concatenator(fsc_seed const& lhs, char rhs) : m_lhs(lhs), m_rhs(rhs){}
 
@@ -340,98 +333,87 @@ namespace stlsoft
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(S const& lhs, S const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(S const& lhs, S const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(S const& lhs, C const* rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(S const& lhs, C const* rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(S const& lhs, C const rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(S const& lhs, C const rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(C const* lhs, S const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(C const* lhs, S const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(C const lhs, S const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(C const lhs, S const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(fast_string_concatenator const& lhs, S const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(fast_string_concatenator const& lhs, S const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(sptr_class_type const& lhs, string_type const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(sptr_class_type const& lhs, string_type const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(fast_string_concatenator const& lhs, C const* rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(fast_string_concatenator const& lhs, C const* rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(sptr_class_type const& lhs, char_type const* rhs)
-            : m_lhs(lhs)
-            , m_rhs(rhs)
-    {}
-
-    template<   class S
-            ,   class C
-            ,   class T
-    >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(fast_string_concatenator const& lhs, C const rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(sptr_class_type const& lhs, char_type const* rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(sptr_class_type const& lhs, char_type const rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(fast_string_concatenator const& lhs, C const rhs)
+            : m_lhs(lhs)
+            , m_rhs(rhs)
+    {}
+
+    template<   class S
+            ,   class C
+    >
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(sptr_class_type const& lhs, char_type const rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
@@ -439,54 +421,48 @@ namespace stlsoft
 // These constructors are for handling embedded braces in the concatenation sequences, and represent the pathological case
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(fast_string_concatenator const& lhs, fast_string_concatenator const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(fast_string_concatenator const& lhs, fast_string_concatenator const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(S const& lhs, fast_string_concatenator const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(S const& lhs, fast_string_concatenator const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(C const* lhs, fast_string_concatenator const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(C const* lhs, fast_string_concatenator const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(C const lhs, fast_string_concatenator const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(C const lhs, fast_string_concatenator const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::fast_string_concatenator(fsc_seed const& lhs, S const& rhs)
+    inline fast_string_concatenator<S, C>::fast_string_concatenator(fsc_seed const& lhs, S const& rhs)
             : m_lhs(lhs)
             , m_rhs(rhs)
     {}
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T>::operator S() const
+    inline fast_string_concatenator<S, C>::operator S() const
     {
         size_type   len = length();
         string_type s(len, '~');
@@ -502,11 +478,10 @@ namespace stlsoft
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T> operator +(fsc_seed const& lhs, S const& rhs)
+    inline fast_string_concatenator<S, C> operator +(fsc_seed const& lhs, S const& rhs)
     {
-        return fast_string_concatenator<S, C, T>(lhs, rhs);
+        return fast_string_concatenator<S, C>(lhs, rhs);
     }
 
     template<   class  S>
@@ -526,27 +501,23 @@ namespace stlsoft
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T> const& operator +(fsc_seed const& /* lhs */, fast_string_concatenator<S, C, T> const& rhs)
+    inline fast_string_concatenator<S, C> const& operator +(fsc_seed const& /* lhs */, fast_string_concatenator<S, C/*, T*/> const& rhs)
     {
         return rhs;
     }
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T> operator +(fast_string_concatenator<S, C, T> const& lhs, S const& rhs)
+    inline fast_string_concatenator<S, C> operator +(fast_string_concatenator<S, C> const& lhs, S const& rhs)
     {
-        return fast_string_concatenator<S, C, T>(lhs, rhs);
+        return fast_string_concatenator<S, C>(lhs, rhs);
     }
 
     template<   class S
-            ,   class C
-            ,   class T
     >
-    inline auto operator +(concat_ptr_and_alloc<S, C, T> const & lhs, S const& rhs)
+    inline auto operator +(concat_ptr_and_alloc<S> const & lhs, S const& rhs)
     {
         return concat_ptr_and_alloc<S> {std::allocate_shared<fast_string_concatenator<S>>(lhs.alloc, lhs.concat_ptr, rhs)
                 , std::move(lhs.alloc)};
@@ -554,17 +525,15 @@ namespace stlsoft
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T> operator +(fast_string_concatenator<S, C, T> const& lhs, C const* rhs)
+    inline fast_string_concatenator<S, C> operator +(fast_string_concatenator<S, C> const& lhs, C const* rhs)
     {
-        return fast_string_concatenator<S, C, T>(lhs, rhs);
+        return fast_string_concatenator<S, C>(lhs, rhs);
     }
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline auto operator +(concat_ptr_and_alloc<S, C, T> const & lhs, C const* rhs)
+    inline auto operator +(concat_ptr_and_alloc<S> const & lhs, C const* rhs)
     {
         return concat_ptr_and_alloc<S> {std::allocate_shared<fast_string_concatenator<S>>(lhs.alloc, lhs.concat_ptr, rhs)
                 , std::move(lhs.alloc)};
@@ -572,18 +541,16 @@ namespace stlsoft
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T> operator +(fast_string_concatenator<S, C, T> const& lhs, C const rhs)
+    inline fast_string_concatenator<S, C> operator +(fast_string_concatenator<S, C> const& lhs, C const rhs)
     {
-        return fast_string_concatenator<S, C, T>(lhs, rhs);
+        return fast_string_concatenator<S, C>(lhs, rhs);
     }
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline auto operator +(concat_ptr_and_alloc<S, C, T> const & lhs, C const rhs)
+    inline auto operator +(concat_ptr_and_alloc<S> const & lhs, C const rhs)
     {
         return concat_ptr_and_alloc<S> {std::allocate_shared<fast_string_concatenator<S>>(lhs.alloc, lhs.concat_ptr, rhs)
                 , std::move(lhs.alloc)};
@@ -592,38 +559,34 @@ namespace stlsoft
 // These operators are for handling embedded braces in the concatenation sequences, and represent the pathological case
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T> operator +(fast_string_concatenator<S, C, T> const& lhs, fast_string_concatenator<S, C, T> const& rhs)
+    inline fast_string_concatenator<S, C> operator +(fast_string_concatenator<S, C> const& lhs, fast_string_concatenator<S, C> const& rhs)
     {
-        return fast_string_concatenator<S, C, T>(lhs, rhs);
+        return fast_string_concatenator<S, C>(lhs, rhs);
     }
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T> operator +(S const& lhs, fast_string_concatenator<S, C, T> const& rhs)
+    inline fast_string_concatenator<S, C> operator +(S const& lhs, fast_string_concatenator<S, C> const& rhs)
     {
-        return fast_string_concatenator<S, C, T>(lhs, rhs);
+        return fast_string_concatenator<S, C>(lhs, rhs);
     }
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T> operator +(C const* lhs, fast_string_concatenator<S, C, T> const& rhs)
+    inline fast_string_concatenator<S, C> operator +(C const* lhs, fast_string_concatenator<S, C> const& rhs)
     {
-        return fast_string_concatenator<S, C, T>(lhs, rhs);
+        return fast_string_concatenator<S, C>(lhs, rhs);
     }
 
     template<   class S
             ,   class C
-            ,   class T
     >
-    inline fast_string_concatenator<S, C, T> operator +(C const lhs, fast_string_concatenator<S, C, T> const& rhs)
+    inline fast_string_concatenator<S, C> operator +(C const lhs, fast_string_concatenator<S, C> const& rhs)
     {
-        return fast_string_concatenator<S, C, T>(lhs, rhs);
+        return fast_string_concatenator<S, C>(lhs, rhs);
     }
 
 /* ////////////////////////////////////////////////////////////////////// */
