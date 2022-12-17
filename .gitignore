@@ -33,3 +33,4 @@
 config.h
 cmake-build*
 .idea*
+build*
