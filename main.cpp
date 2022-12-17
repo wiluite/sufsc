@@ -37,37 +37,48 @@ void memuse()
 }
 
 
+using string_class = std::string;
+
+template <class T>
+auto transport (T s)
+{
+    static_assert(!std::is_same_v<string_class, T>);
+    return s;
+}
+
 int main() {
 
-    using string_class = std::string;
+    using saving_stack = concat_arena<string_class>;
 
     string_class s1 = "Goodbye";
     string_class s2 = "Cruel";
     string_class s3 = "World";
 
     // Correct Old Use-Case
-    string_class res_string = fsc_seed() + s1 + ' ' + s2 + ' ' + s3 + ",ha-ha!";
+    string_class res_string = fsc_seed()+s1+','+s2+' '+s3+",oh-oh!";
     std::cout << res_string << '\n';
 
     // Incorrect Old Use-Case
-    // Don't!
-    // auto tmp = stlsoft::fsc_seed() + s1 + ' ' + s2 + ' ' + s3 + ",ha-ha!";
-    // stack-use-after-scope!
+    auto tmp = stlsoft::fsc_seed()+s1+','+s2+' '+s3+",oh-oh!";
+    // Don't! Stack-use-after-scope!
     // string_class str = tmp;
     // std::cout << str << std::endl;
 
     // New Use-Case
-    concat_arena<string_class> stack_arena;
+    saving_stack arena;
     memuse();
-    auto const tmp_fsc = fsc_safe_seed<string_class>(stack_arena) + s1 + ' ' + s2 + ' ' + s3 + ",ha-ha!";
+    auto const tmp_fsc = fsc_safe_seed(arena)+s1+','+s2+' '+s3+",oh-oh!";
     // do something special
     //...
     //....
     // assign to a string at *any* time
-    string_class result_string = tmp_fsc;
-    memuse();
+    string_class result_string = transport(tmp_fsc);
+    memuse(); // dynamic memory allocation (if any) only at result_string initialization
 
-    std::cout << result_string << '\n';
+    // Backward compatible case
+    string_class result_string2 = fsc_safe_seed(arena)+s1+','+s2+' '+s3+",oh-oh!";
+
+    std::cout << result_string << '\n' << result_string2 << '\n';
 
     return 0;
 }

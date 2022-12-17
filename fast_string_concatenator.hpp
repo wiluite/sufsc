@@ -71,7 +71,7 @@ namespace stlsoft
     using concat_allocator = short_alloc<fast_string_concatenator<S, typename S::value_type>, concat_alloc_size<S>>;
 
     template<typename S>
-    using concat_arena = typename concat_allocator<S>::arena_type;
+    struct concat_arena : concat_allocator<S>::arena_type {};
 
     template<   class S
     >
@@ -100,13 +100,13 @@ namespace stlsoft
         typedef S   string_type;
     };
 
-    template <class T>
+    template <template<class> class C, class T>
     class fsc_safe_seed
             : public fsc_seed
     {
-        concat_arena<T> & arena_;
+        C<T> & arena_;
     public:
-        explicit fsc_safe_seed(concat_arena<T> & arena) : arena_(arena) {}
+        explicit fsc_safe_seed(C<T> & arena): arena_(arena) {}
         auto& get_arena() const
         {
             return arena_;
@@ -490,8 +490,8 @@ namespace stlsoft
         return fast_string_concatenator<S>(lhs, rhs);
     }
 
-    template<class S>
-    concat_ptr_and_alloc<S> operator +(fsc_safe_seed<S> const& lhs, S const& rhs)
+    template<class S, template <class> class T>
+    concat_ptr_and_alloc<S> operator +(fsc_safe_seed<T,S> const& lhs, S const& rhs)
 
     {
         concat_allocator<S> al(lhs.get_arena());
@@ -502,7 +502,7 @@ namespace stlsoft
     template<   class S
             ,   class C
     >
-    inline fast_string_concatenator<S, C> const& operator +(fsc_seed const& /* lhs */, fast_string_concatenator<S, C/*, T*/> const& rhs)
+    inline fast_string_concatenator<S, C> const& operator +(fsc_seed const& , fast_string_concatenator<S, C> const& rhs)
     {
         return rhs;
     }
